@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Sidebar } from '@/components/Sidebar';
 import { TaskBoard } from '@/components/TaskBoard';
 import { ChatPanel } from '@/components/ChatPanel';
@@ -24,10 +25,20 @@ interface IndexProps {
 
 const Index: React.FC<IndexProps> = ({ user, workspace, onLogout, onLeaveWorkspace }) => {
   const [activeTab, setActiveTab] = useState('tasks');
-  const [points, setPoints] = useState(1250);
+  const [points, setPoints] = useState(0);
   const [userRole] = useState<'manager' | 'team-lead' | 'member'>(
     workspace.isOwner ? 'manager' : 'team-lead'
   );
+
+  // Load real points from completed tasks
+  useEffect(() => {
+    const fetchPoints = async () => {
+      const { data } = await supabase.from('tasks').select('points, status').eq('workspace_id', workspace.id).eq('created_by', user.id).eq('status', 'done');
+      const total = (data || []).reduce((s, t) => s + (t.points || 25), 0);
+      setPoints(total);
+    };
+    fetchPoints();
+  }, [workspace.id, user.id]);
 
   const addPoints = (amount: number) => {
     setPoints(prev => prev + amount);
@@ -67,7 +78,7 @@ const Index: React.FC<IndexProps> = ({ user, workspace, onLogout, onLeaveWorkspa
               {activeTab === 'tasks' && (
                 <div className="space-y-6">
                   <TaskBoard onPointsEarned={addPoints} user={user} workspace={workspace} />
-                  <SmartTaskSuggestions onAcceptSuggestion={handleAcceptSuggestion} />
+                  <SmartTaskSuggestions onAcceptSuggestion={handleAcceptSuggestion} workspace={workspace} />
                 </div>
               )}
               {activeTab === 'chat' && <ChatPanel onPointsEarned={addPoints} user={user} workspace={workspace} />}
@@ -76,9 +87,9 @@ const Index: React.FC<IndexProps> = ({ user, workspace, onLogout, onLeaveWorkspa
               {activeTab === 'mood' && <MoodCheck user={user} />}
               {activeTab === 'analytics' && <WorkHeatmap user={user} />}
               {activeTab === 'code' && <CodeCollaboration user={user} workspace={workspace} />}
-              {activeTab === 'achievements' && <BadgesAndTitles />}
+              {activeTab === 'achievements' && <BadgesAndTitles user={user} />}
               {activeTab === 'sprints' && <SprintManagement isManager={userRole === 'manager'} user={user} workspace={workspace} />}
-              {activeTab === 'ai-wrap' && <AIWrapUp />}
+              {activeTab === 'ai-wrap' && <AIWrapUp user={user} workspace={workspace} />}
               {activeTab === 'progress' && <ProgressTracking userRole={userRole} user={user} workspace={workspace} />}
               {activeTab === 'meetings' && <MeetingNotes user={user} workspace={workspace} />}
             </div>

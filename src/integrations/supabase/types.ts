@@ -165,6 +165,97 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_files: {
+        Row: {
+          created_at: string
+          download_count: number
+          file_type: string
+          id: string
+          name: string
+          size_bytes: number
+          storage_path: string | null
+          uploaded_by: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          download_count?: number
+          file_type?: string
+          id?: string
+          name: string
+          size_bytes?: number
+          storage_path?: string | null
+          uploaded_by: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          download_count?: number
+          file_type?: string
+          id?: string
+          name?: string
+          size_bytes?: number
+          storage_path?: string | null
+          uploaded_by?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_files_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sprints: {
+        Row: {
+          created_at: string
+          created_by: string
+          end_date: string
+          goals: string[] | null
+          id: string
+          name: string
+          start_date: string
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          end_date: string
+          goals?: string[] | null
+          id?: string
+          name: string
+          start_date: string
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          end_date?: string
+          goals?: string[] | null
+          id?: string
+          name?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sprints_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assignee: string | null
@@ -176,6 +267,7 @@ export type Database = {
           due_time: string | null
           id: string
           points: number | null
+          sprint_id: string | null
           status: string
           title: string
           updated_at: string
@@ -191,6 +283,7 @@ export type Database = {
           due_time?: string | null
           id?: string
           points?: number | null
+          sprint_id?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -206,6 +299,7 @@ export type Database = {
           due_time?: string | null
           id?: string
           points?: number | null
+          sprint_id?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -213,7 +307,49 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "tasks_sprint_id_fkey"
+            columns: ["sprint_id"]
+            isOneToOne: false
+            referencedRelation: "sprints"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_points: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          reason: string | null
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points?: number
+          reason?: string | null
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          reason?: string | null
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_points_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
