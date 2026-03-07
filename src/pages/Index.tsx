@@ -78,7 +78,7 @@ const Index: React.FC<IndexProps> = ({ user, workspace, onLogout, onLeaveWorkspa
               {activeTab === 'tasks' && (
                 <div className="space-y-6">
                   <TaskBoard onPointsEarned={addPoints} user={user} workspace={workspace} />
-                  <SmartTaskSuggestions onAcceptSuggestion={handleAcceptSuggestion} />
+                  <SmartTaskSuggestions onAcceptSuggestion={handleAcceptSuggestion} workspace={workspace} />
                 </div>
               )}
               {activeTab === 'chat' && <ChatPanel onPointsEarned={addPoints} user={user} workspace={workspace} />}
