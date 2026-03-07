@@ -89,7 +89,7 @@ const Index: React.FC<IndexProps> = ({ user, workspace, onLogout, onLeaveWorkspa
               {activeTab === 'code' && <CodeCollaboration user={user} workspace={workspace} />}
               {activeTab === 'achievements' && <BadgesAndTitles user={user} />}
               {activeTab === 'sprints' && <SprintManagement isManager={userRole === 'manager'} user={user} workspace={workspace} />}
-              {activeTab === 'ai-wrap' && <AIWrapUp />}
+              {activeTab === 'ai-wrap' && <AIWrapUp user={user} workspace={workspace} />}
               {activeTab === 'progress' && <ProgressTracking userRole={userRole} user={user} workspace={workspace} />}
               {activeTab === 'meetings' && <MeetingNotes user={user} workspace={workspace} />}
             </div>
