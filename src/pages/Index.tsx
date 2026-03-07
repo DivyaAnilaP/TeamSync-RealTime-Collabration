@@ -24,10 +24,20 @@ interface IndexProps {
 
 const Index: React.FC<IndexProps> = ({ user, workspace, onLogout, onLeaveWorkspace }) => {
   const [activeTab, setActiveTab] = useState('tasks');
-  const [points, setPoints] = useState(1250);
+  const [points, setPoints] = useState(0);
   const [userRole] = useState<'manager' | 'team-lead' | 'member'>(
     workspace.isOwner ? 'manager' : 'team-lead'
   );
+
+  // Load real points from completed tasks
+  useEffect(() => {
+    const fetchPoints = async () => {
+      const { data } = await supabase.from('tasks').select('points, status').eq('workspace_id', workspace.id).eq('created_by', user.id).eq('status', 'done');
+      const total = (data || []).reduce((s, t) => s + (t.points || 25), 0);
+      setPoints(total);
+    };
+    fetchPoints();
+  }, [workspace.id, user.id]);
 
   const addPoints = (amount: number) => {
     setPoints(prev => prev + amount);
