@@ -29,9 +29,9 @@ export const BadgesAndTitles: React.FC<BadgesAndTitlesProps> = ({ user }) => {
         } else break;
       }
 
-      const { count } = await supabase.from('chat_messages').select('*', { count: 'exact', head: true }).eq('sender_id', userId);
+      const { data: messages } = await supabase.from('chat_messages').select('id').eq('sender_id', userId);
 
-      setStats({ tasksCompleted: completed.length, totalPoints: totalPts, streak, messagesCount: count || 0 });
+      setStats({ tasksCompleted: completed.length, totalPoints: totalPts, streak, messagesCount: messages?.length || 0 });
     };
     fetchStats();
   }, [user?.id]);
