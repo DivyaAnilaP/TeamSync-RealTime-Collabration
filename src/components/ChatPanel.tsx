@@ -71,42 +71,33 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ onPointsEarned, user, work
     try {
       const { data, error } = await supabase
         .from('chat_messages')
-        .select('*, profiles!chat_messages_sender_id_fkey(display_name)')
+        .select('*')
         .eq('workspace_id', workspace.id)
         .order('created_at', { ascending: true })
         .limit(100);
 
-      if (error) {
-        // Fallback: fetch without join if FK doesn't exist
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('chat_messages')
-          .select('*')
-          .eq('workspace_id', workspace.id)
-          .order('created_at', { ascending: true })
-          .limit(100);
-        
-        if (fallbackError) throw fallbackError;
-        
-        setMessages((fallbackData || []).map((msg: any) => ({
+      if (error) throw error;
+
+      const senderIds = [...new Set((data || []).map((msg: any) => msg.sender_id))];
+      const { data: profiles } = senderIds.length > 0
+        ? await supabase.from('profiles').select('user_id, display_name').in('user_id', senderIds)
+        : { data: [] as any[] };
+
+      const profileByUserId = new Map((profiles || []).map((profile: any) => [profile.user_id, profile.display_name]));
+
+      setMessages((data || []).map((msg: any) => {
+        const senderName = msg.sender_id === user.id ? user.name : (profileByUserId.get(msg.sender_id) || 'Team member');
+
+        return {
           id: msg.id,
-          sender: msg.sender_id === user.id ? user.name : 'Team member',
+          sender: senderName,
           sender_id: msg.sender_id,
           content: msg.content,
           timestamp: new Date(msg.created_at),
           type: msg.type,
-          avatar: msg.sender_id === user.id ? user.avatar : 'TM',
-        })));
-      } else {
-        setMessages((data || []).map((msg: any) => ({
-          id: msg.id,
-          sender: msg.sender_id === user.id ? user.name : (msg.profiles?.display_name || 'Team member'),
-          sender_id: msg.sender_id,
-          content: msg.content,
-          timestamp: new Date(msg.created_at),
-          type: msg.type,
-          avatar: msg.sender_id === user.id ? user.avatar : (msg.profiles?.display_name || 'T').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
-        })));
-      }
+          avatar: msg.sender_id === user.id ? user.avatar : senderName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
+        };
+      }));
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally { setLoading(false); }

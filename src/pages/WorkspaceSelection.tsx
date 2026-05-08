@@ -61,18 +61,18 @@ export const WorkspaceSelection: React.FC<WorkspaceSelectionProps> = ({ user, on
 
       if (wsError) throw wsError;
 
-      // Get member counts
+      // Get member counts without HEAD requests so the preview/network layer does not abort them
       const workspacesWithDetails: Workspace[] = await Promise.all(
         (wsData || []).map(async (ws) => {
-          const { count } = await supabase
+          const { data: members } = await supabase
             .from('workspace_members')
-            .select('*', { count: 'exact', head: true })
+            .select('id')
             .eq('workspace_id', ws.id);
 
           const memberRole = memberData.find(m => m.workspace_id === ws.id)?.role || 'member';
           return {
             ...ws,
-            memberCount: count || 1,
+            memberCount: members?.length || 1,
             isOwner: ws.owner_id === user.id,
             role: memberRole,
           };
