@@ -1,8 +1,6 @@
 # Welcome to Real-Time collaboration platform
 
-## Project info
 
-**URL**: https://lovable.dev/projects/92d8cfcd-d5f0-4906-a875-a0c01abb82b2
 
 
 # Step 1: Clone the repository using the project's Git URL.
